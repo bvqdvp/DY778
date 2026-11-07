@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 30
     env:
       THEOS_REVISION: 88506b2c22e9e07dd4ed055f23c9e398a117a2c7
