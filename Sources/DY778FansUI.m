@@ -1,5 +1,7 @@
 #import "DY778FansUI.h"
 #import "DY778RadarUI.h"
+#import "DY778FansBatch.h"
+#import "DY778FansHistory.h"
 
 @interface DY778FansQueryController : UITableViewController
 @property(nonatomic, copy) NSDictionary *person;
@@ -48,16 +50,17 @@
         if (!self || self.generation != generation || ![self current]) return;
         self.busy = NO; if (result) { self.result = result; self.person = result.person; if (result.anchor) self.anchor = result.anchor; }
         self.status = error.localizedDescription ?: (self.anchor ? (result.clubs.count ? @"本次查询已完成" : @"暂未取得可确认的灯牌") : @"资料已更新，选择主播可核对对应灯牌");
+        DY778FansHistorySave(self.account,DY778FansHistorySnapshot(result,self.person,self.anchor,error),NSUUID.UUID.UUIDString);
         DY778ShowToast(@"fans", self.status, NO, error == nil); [self.tableView reloadData];
     }];
 }
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView { return 4; }
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView { return 6; }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section { return section == 0 ? 3 : section == 2 ? MAX((NSUInteger)1,self.result.clubs.count) : 1; }
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section { return @[@"当前用户", @"查询主播", @"粉丝灯牌", @"本次结果"][(NSUInteger)section]; }
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section { return @[@"当前用户", @"查询主播", @"粉丝灯牌", @"本次结果", @"批量查询", @"本地历史"][(NSUInteger)section]; }
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
     if (section == 0) return @"等级区间仅用于说明等级范围，不代表实际消费金额。";
     if (section == 2) return self.result.notice ?: @"只展示当前可查询且归属匹配的资料。暂未返回不代表没有加入。";
-    if (section == 3) return @"结果不保存为本地历史；切换账号或关闭功能会停止当前查询。";
+    if (section == 3) return @"查询结果保存到当前抖音账号的本地历史；切换账号或关闭功能会停止当前查询。";
     return nil;
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)path {
@@ -80,11 +83,15 @@
         NSString *name = [club[@"anchorName"] length] ? club[@"anchorName"] : self.anchor ? DY778FansPersonName(self.anchor) : @"主播资料暂未返回";
         return DY778RadarCell(title,[NSString stringWithFormat:@"%@\n%@",level,name],@"star.fill",NO);
     }
+    if (path.section == 5) return DY778RadarCell(@"查看本地查询记录", @"按当前抖音账号保存，可回看、删除并导出", @"clock.arrow.circlepath", YES);
+    if (path.section == 4) return DY778RadarCell(@"多主播灯牌排行", @"配置主播名单，批量查询、排序并导出到网页", @"list.number", YES);
     return DY778RadarCell(@"复制查询结果",self.busy ? @"查询完成后可复制" : self.status ?: @"等待查询",@"doc.on.doc",NO);
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)path {
     [tableView deselectRowAtIndexPath:path animated:YES]; if (self.busy || ![self current]) return;
-    if (path.section == 1) [self selectAnchor];
+    if (path.section == 5) DY778FansOpenHistory(self);
+    else if (path.section == 4) DY778FansOpenBatch(self,self.result.person ?: self.person);
+    else if (path.section == 1) [self selectAnchor];
     else if (path.section == 3 && self.result) { UIPasteboard.generalPasteboard.string = self.result.shareText; DY778Toast(@"查询结果已复制"); }
     else if (path.section == 0 && path.row == 2 && [self.result.person[@"signature"] length]) { UIPasteboard.generalPasteboard.string = self.result.person[@"signature"]; DY778Toast(@"个人简介已复制"); }
 }

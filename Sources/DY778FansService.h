@@ -8,5 +8,6 @@ NSString *DY778FansLastDiagnostic(void);
 - (void)queryInput:(NSString *)input mode:(DY778FansInputMode)mode target:(NSDictionary *)target anchor:(NSDictionary *)anchor completion:(void (^)(DY778FansResult *, NSError *))completion;
 - (void)resolveInput:(NSString *)input mode:(DY778FansInputMode)mode completion:(DY778FansReply)completion;
 - (void)refreshPerson:(NSDictionary *)person completion:(DY778FansReply)completion;
+- (void)refreshAnchorLive:(NSDictionary *)person completion:(DY778FansReply)completion;
 - (void)cancel;
 @end

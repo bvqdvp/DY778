@@ -3,6 +3,8 @@
 #import "DY778FansWeb.h"
 #import "DY778FansPrivate.h"
 #import <UIKit/UIKit.h>
+#import "DY778FansLiveState.h"
+#import "DY778LiveInfo.h"
 
 static NSString *DY778FansDiagnosticSnapshot;
 NSString *DY778FansLastDiagnostic(void) { return DY778FansDiagnosticSnapshot ?: @"尚无查询记录"; }
@@ -273,6 +275,33 @@ static void DY778FansCacheProfile(NSDictionary *person) {
     if (![self prepare:completion]) return;
     [self loadAnchor:person force:YES completion:^(id value,NSError *error) { [self finish:value error:error]; }];
 }
+- (void)refreshAnchorLive:(NSDictionary *)person completion:(DY778FansReply)completion {
+    if (![self prepare:completion]) return;
+    [self loadAnchor:person force:YES completion:^(NSDictionary *profile,NSError *error) {
+        if (error || !profile) { [self finish:nil error:error ?: DY778FansError(502,@"主播资料暂不可读")]; return; }
+        NSMutableDictionary *fresh = [profile mutableCopy];
+        [fresh removeObjectForKey:@"liveRawStatus"]; fresh[@"liveState"] = @"unknown"; fresh[@"liveCheckedAt"] = @(NSDate.date.timeIntervalSince1970);
+        NSString *roomID = DY778FansString(profile[@"roomID"]); NSNumber *room = DY778FansInteger(roomID);
+        Class cls = NSClassFromString(@"HTSLiveRoomAPI");
+        if (!room || room.longLongValue <= 0 || !DY778LiveRoomAPIAvailable(cls)) {
+            [self finish:fresh error:nil]; return;
+        }
+        [self stage:@"正在核对直播状态…" start:^(DY778FansReply receive) {
+            self.native = DY778FansCall([cls alloc],@"initWithRoomID:",@[room]);
+            if (!self.native) { receive(nil,DY778FansError(503,@"当前版本无法读取直播状态")); return; }
+            void (^callback)(id,id) = ^(id first,id second) {
+                NSError *failure = [first isKindOfClass:NSError.class] ? first : [second isKindOfClass:NSError.class] ? second : nil;
+                NSDictionary *state = failure ? nil : DY778FansReadLiveState(first,roomID,profile[@"uid"],0) ?: DY778FansReadLiveState(second,roomID,profile[@"uid"],0);
+                receive(state,failure);
+            };
+            DY778FansCall(self.native,@"fetchRoomInfoWithRoomID:completion:",@[room,callback]);
+        } reply:^(NSDictionary *state,NSError *failure) {
+            if (state) [fresh addEntriesFromDictionary:state];
+            if (failure) { [self finish:nil error:failure]; return; }
+            [self finish:fresh error:nil];
+        }];
+    }];
+}
 - (void)loadAnchor:(NSDictionary *)anchor completion:(DY778FansReply)completion { [self loadAnchor:anchor force:NO completion:completion]; }
 - (void)loadAnchor:(NSDictionary *)anchor force:(BOOL)force completion:(DY778FansReply)completion {
     NSDictionary *cached = force ? nil : DY778FansCachedProfile(anchor); if (cached) { completion(cached,nil); return; }
@@ -295,7 +324,7 @@ static void DY778FansCacheProfile(NSDictionary *person) {
     }];
 }
 - (DY778FansResult *)emptyResult:(NSDictionary *)person anchor:(NSDictionary *)anchor {
-    DY778FansResult *result = [DY778FansResult new]; result.person = person; result.anchor = anchor; result.clubs = @[]; result.date = NSDate.date; result.diagnostic = @"query=DY778-1.0-3"; return result;
+    DY778FansResult *result = [DY778FansResult new]; result.person = person; result.anchor = anchor; result.clubs = @[]; result.date = NSDate.date; result.diagnostic = @"query=DY778-1.0-3+batch.2"; return result;
 }
 - (BOOL)hasBadge:(DY778FansResult *)result anchor:(NSDictionary *)anchor {
     if (!anchor) return result.clubs.count > 0;

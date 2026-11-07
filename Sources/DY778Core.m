@@ -8,7 +8,7 @@
 #import "DY778ListClear.h"
 #import <math.h>
 
-NSString *const DY778Version = @"1.0-3";
+NSString *const DY778Version = @"1.0-3+batch.2";
 #ifndef DY778_BUILD_TIME
 #define DY778_BUILD_TIME "未记录"
 #endif

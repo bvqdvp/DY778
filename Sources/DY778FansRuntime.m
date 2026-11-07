@@ -4,7 +4,7 @@
 #import <CoreFoundation/CoreFoundation.h>
 
 NSString * const DY778FansName = @"星牌查询";
-NSString * const DY778FansVersion = @"1.0-3";
+NSString * const DY778FansVersion = @"1.0-3+batch.2";
 NSString * const DY778FansPreferencesChanged = @"DY778Fans.PreferencesChanged";
 
 id DY778FansRead(id object, NSString *key) {

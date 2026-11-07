@@ -1,5 +1,6 @@
 #import "DY778FansModel.h"
 #import "DY778FansPolicy.h"
+#import "DY778FansLiveState.h"
 
 static NSString *DY778FansTrim(NSString *text) { return [text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]; }
 BOOL DY778FansShareURL(NSURL *url) {
@@ -90,6 +91,7 @@ NSDictionary *DY778FansPerson(id object) {
         if (display.length && ![display isEqual:@"0"]) handle = display;
     }
     NSString *avatar = DY778FansImageURL(DY778FansFirst(object, @[@"avatarURL", @"avatar_medium", @"avatarMedium", @"avatar_thumb", @"avatarThumb"]));
+    id liveDetails = DY778FansFirst(object, @[@"roomDict", @"room_data", @"roomData", @"roomDataInfo"]);
     NSString *room = DY778FansString(DY778FansFirst(object, @[@"roomID", @"room_id", @"roomId"]));
     if (!DY778FansUID(room)) {
         id details = DY778FansFirst(object, @[@"roomDict", @"room_data", @"roomData", @"roomDataInfo"]);
@@ -97,6 +99,9 @@ NSDictionary *DY778FansPerson(id object) {
         room = DY778FansString(DY778FansFirst(details, @[@"id_str", @"id", @"id_p", @"room_id", @"roomID"]));
     }
     NSMutableDictionary *person = [@{@"uid": uid, @"secUID": sec, @"name": DY778FansString(DY778FansFirst(object, @[@"name", @"nickname", @"nickName"])), @"handle": handle, @"avatarURL": avatar, @"roomID": DY778FansUID(room) ? room : @"0", @"signature": DY778FansString(DY778FansFirst(object,@[@"signature",@"bio"])), @"ipLocation": DY778FansString(DY778FansFirst(object,@[@"ip_location",@"ipLocation"]))} mutableCopy];
+    person[@"liveState"] = @"unknown";
+    NSDictionary *live = DY778FansReadLiveState(liveDetails,room,uid,0);
+    if (live) [person addEntriesFromDictionary:live];
     NSDictionary *keys = @{@"followers":@[@"followers",@"follower_count",@"followerCount"], @"following":@[@"following",@"following_count",@"followingCount"], @"likes":@[@"likes",@"total_favorited",@"totalFavorited"], @"works":@[@"works",@"aweme_count",@"awemeCount"]};
     for (NSString *key in keys) { NSNumber *value = DY778FansInteger(DY778FansFirst(object,keys[key])); if (value) person[key] = value; }
     return person;
