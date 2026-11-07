@@ -44,6 +44,11 @@ jobs:
           mkdir -p "$THEOS/sdks"
           cp -R "$sdk_dir/iPhoneOS16.5.sdk" "$THEOS/sdks/"
 
+      - name: Test batch ranking and cancellation policy
+        run: |
+          cc -std=c11 -Wall -Wextra -Werror -x c Sources/DY778FansBatchPolicy.m tests/batch_policy_test.c -I Sources -o "$RUNNER_TEMP/batch-policy-test"
+          "$RUNNER_TEMP/batch-policy-test"
+
       - name: Build package
         run: |
           set -euo pipefail
@@ -57,7 +62,7 @@ jobs:
           deb_files=("$build_dir"/packages/*.deb)
           test "${#deb_files[@]}" -eq 1
           version=$(awk -F': ' '$1 == "Version" { print $2; exit }' control)
-          test "$version" = "1.0-3"
+          test "$version" = "1.0-3+batch.2"
           mkdir -p dist
           cp "${deb_files[0]}" "dist/DY778-${version}-rootless.deb"
           extract_dir="$RUNNER_TEMP/dy778-package"
