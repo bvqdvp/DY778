@@ -1,0 +1,37 @@
+Full arm64 build/link: PASS
+Ad-hoc code-directory page hash integrity: PASS
+No unresolved DY778 symbols: PASS
+Ranking/cancellation/selected retry/unknown live-state logic tests: PASS
+History snapshot JSON compatibility with web importer: PASS
+Compiler warnings in final build: none
+
+NOT TESTED: iOS injection, app UI, actual local-history read/write/account switching, live-state field compatibility, real Douyin queries. No iOS runtime is available.
+
+{
+  "version": "1.0-3+batch.2",
+  "architecture": "arm64",
+  "minimum_ios": "14.0.0",
+  "sha256": "c7f81379110254ba83e34e604daedb9256f47c1f40a4d463234fd8592827b2db",
+  "bytes": 2058592,
+  "code_directories_verified": 1,
+  "dependencies": [
+    "/usr/lib/libobjc.A.dylib",
+    "/System/Library/Frameworks/Foundation.framework/Foundation",
+    "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation",
+    "/System/Library/Frameworks/UIKit.framework/UIKit",
+    "/System/Library/Frameworks/QuartzCore.framework/QuartzCore",
+    "/System/Library/Frameworks/WebKit.framework/WebKit",
+    "/System/Library/Frameworks/AVKit.framework/AVKit",
+    "/System/Library/Frameworks/AVFoundation.framework/AVFoundation",
+    "/System/Library/Frameworks/QuickLook.framework/QuickLook",
+    "/System/Library/Frameworks/UserNotifications.framework/UserNotifications",
+    "/System/Library/Frameworks/ImageIO.framework/ImageIO",
+    "/System/Library/Frameworks/JavaScriptCore.framework/JavaScriptCore",
+    "/usr/lib/libsqlite3.dylib",
+    "/usr/lib/libSystem.B.dylib",
+    "/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics",
+    "/System/Library/Frameworks/CoreMedia.framework/CoreMedia"
+  ]
+}
+
+Ad-hoc integrity does not replace signing the host IPA using the user's existing injection/signing tool.

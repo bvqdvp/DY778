@@ -1,8 +1,8 @@
 Package: com.dy778.douyin
 Name: DY778
-Version: 1.0-3
+Version: 1.0-3+batch.2
 Architecture: iphoneos-arm64
-Description: DY778 · 消息留存、特别关注、直播信息、星牌查询、操作确认与播放增强。适配抖音 39.9.0。
+Description: DY778 Batch extension · 多主播勾选、批量灯牌排行、直播状态刷新、本地历史和 JSON 导出。 消息留存、特别关注、直播信息、星牌查询、操作确认与播放增强。适配抖音 39.9.0。
 Maintainer: DY778
 Author: DY778
 Section: Tweaks
